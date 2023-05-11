@@ -1,83 +1,24 @@
+
 const express = require('express')
-const Joi = require('joi')
 
-const { createError } = require('../../helpers')
 
-const contactsPath = require('../../models/contacts')
+const { validateBody } = require('../../middleWares')
+
+const schemas = require('../../schemas/contacts')
+
 
 const router = express.Router()
 
-const addSchema = Joi.object({
-  name: Joi.string().required(),
-  email: Joi.string().required(),
-  phone: Joi.string().required(),
-})
+const ctrl = require('../../controllers/contacts')
 
-router.get('/', async (req, res, next) => {
-  try {
-    const result = await contactsPath.listContacts()
-    res.json(result)
-  } catch (error) {
-    next(error)
-  }
-})
+router.get('/', ctrl.getAll)
 
-router.get('/:contactId', async (req, res, next) => {
-  try {
-    const { contactId } = req.params
-    const result = await contactsPath.getContactById(contactId)
-    if (!result) {
-      throw createError(404)
-    }
-    res.json(result)
-  } catch (error) {
-    next(error)
-  }
-})
+router.get('/:contactId', ctrl.getById)
 
-router.post('/', async (req, res, next) => {
-  try {
-    const { error } = addSchema.validate(req.body)
-    if (error) {
-      throw createError(400, error.message)
-    }
-    const result = await contactsPath.addContact(req.body)
-    res.status(201).json(result)
-  } catch (error) {
-    next(error)
-  }
-})
+router.post('/', validateBody(schemas), ctrl.add)
 
-router.put('/:contactId', async (req, res, next) => {
-  try {
-    const { error } = addSchema.validate(req.body)
-    if (error) {
-      throw createError(400, error.message)
-    }
-    const { contactId } = req.params
-    const result = await contactsPath.updateContact(contactId, req.body)
-    if (!result) {
-      throw createError(404)
-    }
-    res.json(result)
-  } catch (error) {
-    next(error)
-  }
-})
+router.put('/:contactId', validateBody(schemas), ctrl.updateById)
 
-router.delete('/:contactId', async (req, res, next) => {
-  try {
-    const { contactId } = req.params
-    const result = await contactsPath.removeContact(contactId)
-    if (!result) {
-      throw createError(404)
-    }
-    res.json({
-      message: 'Contact deleted',
-    })
-  } catch (error) {
-    next(error)
-  }
-})
+router.delete('/:contactId', ctrl.deleteById)
 
 module.exports = router

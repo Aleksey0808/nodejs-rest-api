@@ -3,12 +3,10 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "app": "node app",
-    "app:dev": "nodemon app",
-    "start": "cross-env NODE_ENV=production node ./server.js",
-    "start:dev": "cross-env NODE_ENV=development nodemon ./server.js",
-    "lint": "eslint **/*.js",
-    "lint:fix": "eslint --fix **/*.js"
+    "start": "node app",
+    "start:dev": "nodemon app",
+    "lint": "eslint app.js",
+    "lint:fix": "eslint --fix app.js"
   },
   "dependencies": {
     "cors": "^2.8.5",

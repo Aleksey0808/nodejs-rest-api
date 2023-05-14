@@ -1,7 +1,7 @@
+const contactsPath = require('../models/contacts')
+
 const { createError } = require('../helpers')
 const { ctrlWrapper } = require('../middleWares')
-
-const contactsPath = require('../models/contacts')
 
 const getAll = async (req, res) => {
   const result = await contactsPath.listContacts()
@@ -12,7 +12,8 @@ const getById = async (req, res) => {
   const { contactId } = req.params
   const result = await contactsPath.getContactById(contactId)
   if (!result) {
-    throw createError(404)
+    console.log('не все строки заполненны')
+    throw createError(404, 'Not found')
   }
   res.json(result)
 }

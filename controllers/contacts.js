@@ -12,7 +12,6 @@ const getById = async (req, res) => {
   const { contactId } = req.params
   const result = await contactsPath.getContactById(contactId)
   if (!result) {
-    console.log('не все строки заполненны')
     throw createError(404, 'Not found')
   }
   res.json(result)

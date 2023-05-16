@@ -3,8 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node app",
-    "start:dev": "nodemon app",
+     "start": "cross-env NODE_ENV=production node ./server.js",
+    "start:dev": "cross-env NODE_ENV=development nodemon ./server.js",
     "lint": "eslint app.js",
     "lint:fix": "eslint --fix app.js"
   },
@@ -14,6 +14,7 @@
     "express": "^4.17.1",
     "joi": "^17.9.2",
     "moment": "^2.29.4",
+    "mongoose": "^7.1.1",
     "morgan": "1.10.0",
     "nanoid": "^3.3.4"
   },

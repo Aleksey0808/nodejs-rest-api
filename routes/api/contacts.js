@@ -2,8 +2,7 @@ const express = require('express')
 
 const { validateBody, presenceBody, isValidId } = require('../../middleWares')
 
-const schemas = require('../../schemas/contacts')
-const updateFavoriteSchema = require('../../schemas/contacts')
+const { addSchema, updateFavoriteSchema } = require('../../schemas')
 
 const router = express.Router()
 
@@ -13,13 +12,13 @@ router.get('/', ctrl.getAll)
 
 router.get('/:contactId', isValidId, ctrl.getById)
 
-router.post('/', validateBody(schemas), ctrl.add)
+router.post('/', validateBody(addSchema), ctrl.add)
 
 router.put(
   '/:contactId',
   presenceBody,
   isValidId,
-  validateBody(schemas),
+  validateBody(addSchema),
   ctrl.updateById,
 )
 

@@ -1,6 +1,11 @@
 const express = require('express')
 
-const { validateBody, presenceBody, isValidId } = require('../../middleWares')
+const {
+  validateBody,
+  presenceBody,
+  isValidId,
+  authenticate,
+} = require('../../middleWares')
 
 const { addSchema, updateFavoriteSchema } = require('../../schemas')
 
@@ -8,7 +13,7 @@ const router = express.Router()
 
 const ctrl = require('../../controllers/contacts')
 
-router.get('/', ctrl.getAll)
+router.get('/', authenticate, ctrl.getAll)
 
 router.get('/:contactId', isValidId, ctrl.getById)
 

@@ -15,12 +15,13 @@ const ctrl = require('../../controllers/contacts')
 
 router.get('/', authenticate, ctrl.getAll)
 
-router.get('/:contactId', isValidId, ctrl.getById)
+router.get('/:contactId', authenticate, isValidId, ctrl.getById)
 
-router.post('/', validateBody(addSchema), ctrl.add)
+router.post('/', authenticate, validateBody(addSchema), ctrl.add)
 
 router.put(
   '/:contactId',
+  authenticate,
   presenceBody,
   isValidId,
   validateBody(addSchema),
@@ -29,11 +30,12 @@ router.put(
 
 router.patch(
   '/:contactId/favorite',
+  authenticate,
   isValidId,
   validateBody(updateFavoriteSchema),
   ctrl.updateFavorite,
 )
 
-router.delete('/:contactId', ctrl.deleteById)
+router.delete('/:contactId', authenticate, ctrl.deleteById)
 
 module.exports = router

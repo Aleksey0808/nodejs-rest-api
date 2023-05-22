@@ -30,7 +30,7 @@ const register = async (req, res) => {
 const login = async (req, res) => {
   const { email, password } = req.body
   const user = await User.findOne({ email })
-  
+
   if (!user) {
     throw createError(401, 'Email or password invalid')
   }
@@ -44,24 +44,24 @@ const login = async (req, res) => {
   }
 
   const token = jwt.sign(payload, SECRET_KEY, { expiresIn: '23h' })
-  await User.findByIdAndUpdate(user._id, {token})
+  await User.findByIdAndUpdate(user._id, { token })
 
   res.json({ token })
 }
 
 const getCurrent = async (req, res) => {
-  const {_id} = req.user;
-  await User.findByIdAndUpdate(_id, {token: ''})
+  const { name, email } = req.user
   res.json({
-    message: "Logout success"
+    name,
+    email,
   })
 }
 
 const logout = async (req, res) => {
-  const {name, email} = req.user;
+  const { _id } = req.user
+  await User.findByIdAndUpdate(_id, { token: '' })
   res.json({
-    name,
-    email,
+    message: 'Logout success',
   })
 }
 

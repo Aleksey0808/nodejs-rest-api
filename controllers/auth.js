@@ -1,11 +1,17 @@
 const User = require('../models/user')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const gravatar = require('gravatar')
+const path = require('path')
+const fs = require('fs/promises')
+const Jimp = require('jimp')
 
 const { createError } = require('../helpers')
 const { ctrlWrapper } = require('../middleWares')
 
 const { SECRET_KEY } = process.env
+
+const avatarsDir = path.join(__dirname, '../', 'public', 'avatars')
 
 const register = async (req, res) => {
   const { email, password } = req.body
@@ -16,8 +22,13 @@ const register = async (req, res) => {
   }
 
   const hashPassword = await bcrypt.hash(password, 10)
+  const avatarURL = gravatar.url(email)
 
-  const newUser = await User.create({ ...req.body, password: hashPassword })
+  const newUser = await User.create({
+    ...req.body,
+    password: hashPassword,
+    avatarURL,
+  })
   if (!newUser) {
     throw createError(404, 'Not found')
   }
@@ -65,9 +76,29 @@ const logout = async (req, res) => {
   })
 }
 
+const updateAvatar = async (req, res) => {
+  const { _id } = req.user
+  const { path: tempUpload, originalname } = req.file
+
+  const avatar = await Jimp.read(tempUpload)
+  await avatar
+    .cover(250, 250, Jimp.HORIZONTAL_ALIGN_CENTER | Jimp.VERTICAL_ALIGN_MIDDLE)
+    .writeAsync(tempUpload)
+
+  const filName = `${_id}_${originalname}`
+  const resultUpload = path.join(avatarsDir, filName)
+  await fs.rename(tempUpload, resultUpload)
+  const avatarURL = path.join('avatars', filName)
+  await User.findByIdAndUpdate(_id, { avatarURL })
+  res.json({
+    avatarURL,
+  })
+}
+
 module.exports = {
   register: ctrlWrapper(register),
   login: ctrlWrapper(login),
   getCurrent: ctrlWrapper(getCurrent),
   logout: ctrlWrapper(logout),
+  updateAvatar: ctrlWrapper(updateAvatar),
 }

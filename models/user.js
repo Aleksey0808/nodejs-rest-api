@@ -1,7 +1,7 @@
 const { Schema, model } = require('mongoose')
 const { handleMongooseError } = require('../helpers')
 
-const contactSchema = new Schema(
+const userSchema = new Schema(
   {
     name: {
       type: String,
@@ -9,21 +9,18 @@ const contactSchema = new Schema(
     },
     email: {
       type: String,
+      unique: true,
       required: true,
     },
-    phone: {
+    password: {
       type: String,
+      minlength: 4,
       required: true,
     },
-    favorite: {
-      type: Boolean,
-      default: false,
-    },
-    owner: {
-      type: Schema.Types.ObjectId,
-      ref: 'user',
-      required: true,
-    },
+    token: {
+      type: String,
+      default: "",
+    }
   },
   {
     versionKey: false,
@@ -31,8 +28,8 @@ const contactSchema = new Schema(
   },
 )
 
-contactSchema.post('save', handleMongooseError)
+userSchema.post('save', handleMongooseError)
 
-const Contact = model('contact', contactSchema)
+const User = model('user', userSchema)
 
-module.exports = Contact
+module.exports = User

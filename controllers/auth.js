@@ -5,11 +5,12 @@ const gravatar = require('gravatar')
 const path = require('path')
 const fs = require('fs/promises')
 const Jimp = require('jimp')
+const { nanoid } = require('nanoid')
 
-const { createError } = require('../helpers')
+const { createError, sendEmail } = require('../helpers')
 const { ctrlWrapper } = require('../middleWares')
 
-const { SECRET_KEY } = process.env
+const { SECRET_KEY, PROJECT_URL } = process.env
 
 const avatarsDir = path.join(__dirname, '../', 'public', 'avatars')
 
@@ -23,15 +24,26 @@ const register = async (req, res) => {
 
   const hashPassword = await bcrypt.hash(password, 10)
   const avatarURL = gravatar.url(email)
+  const verificationCode = nanoid()
 
   const newUser = await User.create({
     ...req.body,
     password: hashPassword,
     avatarURL,
+    verificationCode,
   })
+
   if (!newUser) {
     throw createError(404, 'Not found')
   }
+
+  const verifyEmail = {
+    to: email,
+    subject: 'Verify email',
+    html: `<a target="_blank" href="${PROJECT_URL}/api/auth/verify/${verificationCode}">Click to verify email</a>`,
+  }
+  await sendEmail(verifyEmail)
+
   res.status(201).json({
     email: newUser.email,
     name: newUser.name,

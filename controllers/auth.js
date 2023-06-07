@@ -1,4 +1,3 @@
-const User = require('../models/user')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const gravatar = require('gravatar')
@@ -6,6 +5,8 @@ const path = require('path')
 const fs = require('fs/promises')
 const Jimp = require('jimp')
 const { nanoid } = require('nanoid')
+
+const User = require('../models/user')
 
 const { createError, sendEmail } = require('../helpers')
 const { ctrlWrapper } = require('../middleWares')
@@ -47,6 +48,47 @@ const register = async (req, res) => {
   res.status(201).json({
     email: newUser.email,
     name: newUser.name,
+  })
+}
+
+const verify = async (req, res) => {
+  const { verificationCode } = req.params
+  console.log(req.params)
+  const user = await User.findOne({ verificationCode })
+
+  if (!user) {
+    throw createError(404, 'Not found')
+  }
+  await User.findByIdAndUpdate(user._id, {
+    verify: true,
+    verificationCode: '',
+  })
+
+  res.json({
+    message: 'Verify success',
+  })
+}
+
+const resendVerifyEmail = async (req, res) => {
+  const { email } = req.body
+  const user = await User.findOne({ email })
+
+  if (!user) {
+    throw createError(404)
+  }
+
+  if (user.verify) {
+    throw createError(400, 'Email already verify')
+  }
+  const verifyEmail = {
+    to: email,
+    subject: 'Verify email',
+    html: `<a target="_blank" href="${PROJECT_URL}/api/auth/verify/${user.verificationCode}">Click to verify email</a>`,
+  }
+  await sendEmail(verifyEmail)
+
+  res.json({
+    message: 'Verify email send',
   })
 }
 
@@ -109,8 +151,10 @@ const updateAvatar = async (req, res) => {
 
 module.exports = {
   register: ctrlWrapper(register),
+  verify: ctrlWrapper(verify),
   login: ctrlWrapper(login),
   getCurrent: ctrlWrapper(getCurrent),
   logout: ctrlWrapper(logout),
   updateAvatar: ctrlWrapper(updateAvatar),
+  resendVerifyEmail: ctrlWrapper(resendVerifyEmail),
 }

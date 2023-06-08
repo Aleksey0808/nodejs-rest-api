@@ -59,11 +59,13 @@ const verify = async (req, res) => {
   if (!user) {
     throw createError(404, 'Not found')
   }
-  await User.findByIdAndUpdate(user._id, {
+  const confirmedUser = await User.findByIdAndUpdate(user._id, {
     verify: true,
     verificationCode: '',
   })
-
+  if (!confirmedUser) {
+    throw createError(404, 'Unable confirm user')
+  }
   res.json({
     message: 'Verify success',
   })
@@ -102,6 +104,9 @@ const login = async (req, res) => {
   const passwordCompare = await bcrypt.compare(password, user.password)
   if (!passwordCompare) {
     throw createError(401, 'Email or password invalid')
+  }
+  if (!user.verify) {
+    throw createError(404, 'User not found')
   }
 
   const payload = {
